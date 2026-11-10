@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MALMÖ-LST: land surface temperature at 10 m</title>
+<meta name="description" content="10 m land surface temperature maps of Malmö from Sentinel-2 and Landsat. Sustainable Digitalisation Research Centre and Department of Urban Studies, Malmö University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#0B0E12;--panel:#141A21;--line:#26303B;--line2:#3A4654;--fg:#E8ECEF;--fg2:#C9D2DA;--mut:#9AA6B2;--mut2:#7D8A97;--acc:#F07F3C;--acc2:#F2A15F;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans',Arial,sans-serif}
+a{color:var(--acc2)}a:hover{color:#FFC48F}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{padding-block:18px;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
+header nav{display:flex;flex-wrap:wrap;gap:8px 28px;font-size:15px}
+header nav a{color:var(--fg2);text-decoration:none}
+.hero{position:relative;overflow:hidden;background:#000}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.45}
+.hero .wrap{position:relative;padding-block:96px 76px;display:flex;flex-direction:column;gap:20px}
+h1{margin:0;font-size:clamp(32px,5vw,52px);line-height:1.1;font-weight:700;max-width:820px;text-wrap:balance}
+h2{margin:0;font-size:30px;font-weight:700}
+main.wrap{padding-block:40px 72px;display:flex;flex-direction:column;gap:36px}
+section{display:flex;flex-direction:column;gap:18px}
+.intro{margin:0;font-size:16px;line-height:1.5;color:var(--mut);max-width:780px}
+.ctl{display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.grp{display:flex;flex-direction:column;gap:8px}
+.cap{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sel{min-height:44px;padding:0 10px;border-radius:8px;border:1px solid var(--line2);background:var(--bg);color:var(--fg);font:inherit;font-size:15px;min-width:0;max-width:100%}
+.sel:disabled{color:#4A5663;border-color:var(--line);cursor:default}
+.zb,.tb{min-width:44px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--bg);color:var(--fg);font:inherit;font-size:15px;cursor:pointer}
+.zb:hover,.tb:hover{border-color:var(--acc)}
+.tb.on{background:var(--acc);border-color:var(--acc);color:#111;font-weight:600}
+.mono{font-family:'IBM Plex Mono',monospace}
+.legend{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;justify-content:space-between}
+.ramp{flex:1;min-width:120px;height:12px;border-radius:6px;background:linear-gradient(90deg,#fdf1e6,#f6c29a,#eb6834,#b8401a,#6e230c)}
+.maps{display:grid;gap:18px;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr))}
+figure{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+figcaption{display:flex;flex-direction:column;gap:8px}
+.num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#111;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.two{display:grid;gap:8px}
+.lb{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--mut2)}
+.dim{display:flex;flex-direction:column;gap:4px;min-width:0}
+.dim .sel{width:100%}
+.capline{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:19px;min-height:19px;color:var(--mut)}
+.vp{position:relative;aspect-ratio:2082/2394;max-width:100%;overflow:hidden;background:#05070A;border:1px solid var(--line);border-radius:12px;touch-action:none;cursor:grab;user-select:none}
+.vp:active{cursor:grabbing}
+.zl{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
+.zl img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none;-webkit-user-drag:none}
+.none{position:absolute;inset:0;margin:0;padding:24px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:14px;line-height:1.5}
+.mk{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;pointer-events:none;display:none}
+.mk:before,.mk:after{content:"";position:absolute;background:#fff;box-shadow:0 0 0 1px #000}
+.mk:before{left:10px;top:0;width:2px;height:22px}
+.mk:after{top:10px;left:0;height:2px;width:22px}
+.rd:empty{display:none}
+.rd{position:absolute;left:10px;top:10px;padding:6px 10px;border-radius:6px;background:rgba(5,7,10,0.82);color:var(--fg);font:500 14px 'IBM Plex Mono',monospace;pointer-events:none}
+.sb{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;pointer-events:none;width:40%}
+.sb div{height:6px;border:2px solid #fff;border-top:0;box-shadow:0 1px 0 #000}
+.sb span{font:500 12px 'IBM Plex Mono',monospace;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.about{margin:0;font-size:13px;line-height:1.5;color:var(--mut)}
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 22px;display:flex;flex-direction:column;align-self:start}
+.card>.cap{color:var(--acc2);padding:4px 0 6px}
+.ps{display:flex;flex-direction:column;gap:3px;padding:12px 0;border-top:1px solid var(--line)}
+.card>.cap+.ps{border-top:0}
+.ps strong{font-size:15px}
+.ps span{font-size:13px;color:var(--mut)}
+.ps .unit{color:var(--fg2)}
+footer{background:#000;border-top:1px solid var(--line)}
+footer .wrap{padding-block:44px;display:flex;flex-wrap:wrap;gap:32px 64px;justify-content:space-between}
+.fcol{display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--mut);max-width:380px;min-width:0}
+.fcol strong{color:var(--fg);font-size:16px}
+.em{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--fg);user-select:all;overflow-wrap:anywhere}
+.stats{display:flex;flex-wrap:wrap;gap:32px 48px}
+.stats div{display:flex;flex-direction:column;gap:4px}
+.stats b{font-size:34px;font-weight:700;color:var(--acc2)}
+.stats span{font-size:13px;color:var(--mut)}
+@media (max-width:760px){.maps{grid-template-columns:minmax(0,1fr)}.wrap{padding-inline:16px}.hero .wrap{padding-block:56px 44px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:700;font-size:17px;letter-spacing:0.3px">Sustainable Digitalisation Research Centre · Department of Urban Studies</span><span style="font-size:14px;color:var(--mut)">Malmö University</span></div>
+<nav><a href="#maps">Maps</a><a href="#team">Project team</a><a href="#contact">Contact</a></nav>
+</div></header>
+
+<section class="hero">
+<img src="images/hero.jpg" alt="">
+<div class="wrap">
+<h1>Land Surface Temperature at 10 m from Sentinel-2 (MALMÖ-LST)</h1>
+<p style="margin:0;font-size:19px;line-height:1.5;color:#DDE3E8;max-width:720px">Landsat measures surface temperature at about 100 m. We learn its link to Sentinel-2 reflectance and map Malmö at 10 m, for 30 dates between 2018 and 2024. Every model we tested can be put on the maps below.</p>
+<p style="margin:0;font-size:14px;line-height:1.5;color:#B8C2CC;max-width:720px">Part of the project <em style="color:var(--fg)">AI-driven Urban Heat and Health Analysis using Satellite Data for Climate-Resilient Planning</em>, Malmö University with Malmö stad.</p>
+</div>
+</section>
+
+<main class="wrap">
+<section id="maps">
+<div style="display:flex;flex-direction:column;gap:6px">
+<h2>Compare models on one date</h2>
+<p class="intro">Pick a date, then for each map a model, its loss or training, its loss cell (U-Net models), its teacher weight (U-Net student only) and its inputs. Scroll or use + and − to zoom, drag to move: all maps follow. Hover to read the temperature at the same spot in every map.</p>
+</div>
+
+<div class="ctl">
+<div class="grp"><label for="dt" class="cap" style="color:var(--acc2)">Date</label><select id="dt" class="sel" style="min-width:min(300px,100%)"></select></div>
+<div class="grp"><span class="cap">Maps side by side</span><div class="row" id="counts"></div></div>
+<div class="grp"><span class="cap">Go to</span><div class="row">
+<button type="button" class="zb" data-go="all">Whole area</button><button type="button" class="zb" data-go="rail">Rail yard</button><button type="button" class="zb" data-go="motor">Motorway junction</button>
+</div></div>
+<div class="grp"><span class="cap">Zoom</span><div class="row">
+<button type="button" class="zb" id="zout" aria-label="Zoom out">−</button><button type="button" class="zb" id="zin" aria-label="Zoom in">+</button>
+<span id="zoom" class="mono" style="min-width:52px;font-size:14px;color:var(--fg2)">×1.0</span>
+</div></div>
+<label style="display:flex;gap:10px;align-items:center;min-height:44px;font-size:15px;color:var(--fg2)"><input type="checkbox" id="under" checked style="width:18px;height:18px;accent-color:var(--acc)"> Sentinel-2 under water and cloud gaps</label>
+</div>
+
+<div class="legend">
+<div style="display:flex;align-items:center;gap:12px;flex:1 1 420px;min-width:0;max-width:560px">
+<span id="lo" class="mono" style="font-size:13px;color:var(--fg2);white-space:nowrap">–</span><div class="ramp"></div><span id="hi" class="mono" style="font-size:13px;color:var(--fg2);white-space:nowrap">–</span>
+<span style="font-size:13px;color:var(--mut)">same scale on every map</span>
+</div>
+<span id="coord" class="mono" style="font-size:13px;color:var(--mut)">UTM 33N · hover a map</span>
+</div>
+
+<div class="maps" id="maps-grid"></div>
+</section>
+
+<section id="team">
+<div style="display:flex;flex-direction:column;gap:6px">
+<h2>Project team</h2>
+<p class="intro">This work is part of <em style="color:var(--fg2)">AI-driven Urban Heat and Health Analysis using Satellite Data for Climate-Resilient Planning</em>, a project of Malmö University and Malmö stad.</p>
+</div>
+<div class="team">
+<div class="card"><span class="cap">Malmö University</span>
+<div class="ps"><strong>Nosheen Abid</strong><span class="unit">Postdoctoral researcher, Sustainable Digitalisation Research Centre</span><span>Leads the AI work: data integration and modelling</span></div>
+<div class="ps"><strong>Raoof Doorshi</strong><span>Land surface temperature downscaling: models and maps</span></div>
+<div class="ps"><strong>Helena Bohman</strong><span class="unit">Department of Urban Studies</span><span>GIS and spatial analysis</span></div>
+<div class="ps"><strong>Elnaz Sarkheyli</strong><span class="unit">Department of Urban Studies</span><span>Urban planning and nature-based solutions</span></div>
+</div>
+<div class="card"><span class="cap">Malmö stad</span>
+<div class="ps"><strong>Marcus Ohlström</strong><span>Coordination across the city's departments</span></div>
+<div class="ps"><strong>Karl McShane</strong><span>Demographic analysis and data support</span></div>
+</div>
+</div>
+</section>
+</main>
+
+<footer id="contact"><div class="wrap">
+<div class="fcol"><strong>Sustainable Digitalisation Research Centre and Department of Urban Studies</strong><span>Malmö University, 205 06 Malmö, Sweden</span><span>Data: Landsat (USGS), Sentinel-2 (Copernicus)</span></div>
+<div class="fcol" style="gap:12px"><strong>Contact</strong>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="color:var(--fg)">Raoof Doorshi</span><span class="em">r.doorshi@gmail.com</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="color:var(--fg)">Nosheen Abid, Postdoctoral researcher</span><span class="em">nosheen.abid@mau.se</span><a href="https://mau.se/personer/nosheen.abid/" target="_blank" rel="noopener" style="font-size:13px">Staff page at Malmö University</a></div>
+</div>
+<div class="stats"><div><b>30</b><span>dates, 2018–2024</span></div><div><b>10 m</b><span>map grid</span></div><div><b id="nmodels">–</b><span>models</span></div></div>
+</div></footer>
+
+<script>
+var D = [["20180402",30.6,null],["20180502",57.2,null],["20180721",84.1,null],["20180909",8.4,null],["20181103",85.7,null],["20190216",12.9,null],["20190405",30.3,null],["20190606",76.6,[27.2,44.3]],["20190624",11.4,null],["20190724",74.2,null],["20190825",81.6,null],["20200421",56.3,null],["20210325",16.1,null],["20210424",56.8,null],["20220312",18.3,null],["20220320",34.0,null],["20220429",11.1,null],["20220710",11.2,null],["20221105",54.2,null],["20230509",92.8,[16.0,28.5]],["20230728",81.1,null],["20230906",93.6,null],["20230921",77.7,null],["20231008",93.5,null],["20240425",79.9,null],["20240518",58.9,null],["20240806",74.1,null],["20240907",65.1,null],["20240915",76.0,null],["20241017",71.0,null]];
+var LUT = "fdf1e6fdf0e5fdf0e4fdefe2fdeee1fcede0fceddffcecdefcebdcfceadbfceadafce9d9fce8d8fce7d7fbe7d5fbe6d4fbe5d3fbe4d2fbe4d1fbe3cffbe2cefbe2cdfbe1ccfae0cbfadfc9fadfc8fadec7faddc6fadcc5fadcc3fadbc2fadac1f9d9c0f9d9bff9d8bdf9d7bcf9d6bbf9d6baf9d5b9f9d4b8f9d4b6f8d3b5f8d2b4f8d1b3f8d1b2f8d0b0f8cfaff8ceaef8ceadf8cdacf8ccaaf7cba9f7cba8f7caa7f7c9a6f7c8a4f7c8a3f7c7a2f7c6a1f7c6a0f6c59ef6c49df6c39cf6c39bf6c29af6c098f6bf96f5bd95f5bc93f5bb92f5b990f5b88ef5b68df4b58bf4b48af4b288f4b186f4af85f4ae83f3ac82f3ab80f3aa7ef3a87df3a77bf3a57af2a478f2a376f2a175f2a073f29e72f19d70f19c6ef19a6df1996bf1976af19668f09466f09365f09263f09062f08f60f08d5eef8c5def8b5bef895aef8858ef8656ef8555ee8453ee8252ee8150ee7f4eee7e4dee7c4bed7b4aed7a48ed7846ed7745ed7543ec7442ec7340ec713eec703dec6e3bec6d3aeb6c38eb6a36eb6834ea6733e96633e86633e76532e86532e66431e56331e46331e36230e36130e2612fe1602fe0602edf5f2edf5e2ede5e2ddd5d2ddc5c2cdb5c2cdb5b2cda5b2bd95a2bd8592ad7592ad7582ad65729d55729d45628d35528d45528d25427d15427d05326cf5226d05226ce5125cd5025cc5024cb4f24cb4f23ca4e23c94d23c84d22c74c22c74b21c64b21c54a21c44a20c34920c3481fc2481fc1471fc0461ebf461ebf451dbe451dbd441dbc431cbb431cbb421bba411bb9411bb8401ab7401ab63f1ab53f19b43e19b23e19b13d19b03d19af3c18ae3c18ad3c18ac3b18aa3b17a93a17a83a17a73917a63917a53816a33816a23716a13716a037159f36159e36159c35159b35159a34149934149833149733149532139432139332139231139131139030128f30128d2f128c2f128b2e118a2e11892d11882d11862d11852c10842c10832b10822b10812a107f2a0f7e290f7d290f7c280f7b280e7a280e78270e77270e76260e75260d74250d73250d71240d70240c6f230c6e230c";
+var DATES = ["20180402","20180502","20180721","20180909","20181103","20190216","20190405","20190606","20190624","20190724","20190825","20200421","20210325","20210424","20220312","20220320","20220429","20220710","20221105","20230509","20230728","20230906","20230921","20231008","20240425","20240518","20240806","20240907","20240915","20241017"];
+var GROUPS = ["Linear Regression","Random Forest","XGBoost","SVM","MLP","MLP, pooled over dates","U-Net","U-Net student","Fusion of 5 models"];
+var MS = [{"id":"m00","g":"Linear Regression","L":"30 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"Linear Regression","note":""},{"id":"m01","g":"Linear Regression","L":"one model for all dates","W":"","in":"S2 bands","C":"","s":"bands","n":"Linear Regression, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m02","g":"Linear Regression","L":"10 m pixels, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"Linear Regression, 10 m pixels","note":""},{"id":"m03","g":"Linear Regression","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Linear Regression","note":""},{"id":"m04","g":"Linear Regression","L":"one model for all dates","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Linear Regression, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m05","g":"Linear Regression","L":"10 m pixels, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Linear Regression, 10 m pixels","note":""},{"id":"m06","g":"Linear Regression","L":"30 m cells, one model per date","W":"","in":"S2 bands + Landsat bands","C":"","s":"bands+landsat","n":"Linear Regression","note":"also uses Landsat reflectance bands as input"},{"id":"m07","g":"Linear Regression","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands","C":"","s":"bands+indices+landsat","n":"Linear Regression","note":"also uses Landsat reflectance bands as input"},{"id":"m08","g":"Linear Regression","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands and indices","C":"","s":"bands+indices+landsat+lindices","n":"Linear Regression","note":"also uses Landsat reflectance bands as input and Landsat indices"},{"id":"m09","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"Random Forest","note":""},{"id":"m10","g":"Random Forest","L":"one model for all dates","W":"","in":"S2 bands","C":"","s":"bands","n":"Random Forest, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m11","g":"Random Forest","L":"10 m pixels, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"Random Forest, 10 m pixels","note":""},{"id":"m12","g":"Random Forest","L":"10 m pixels, kriging at 30 m","W":"","in":"S2 bands","C":"","s":"bands","n":"Random Forest, 10 m pixels + 30 m kriging","note":""},{"id":"m13","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Random Forest","note":""},{"id":"m14","g":"Random Forest","L":"one model for all dates","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Random Forest, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m15","g":"Random Forest","L":"10 m pixels, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Random Forest, 10 m pixels","note":""},{"id":"m16","g":"Random Forest","L":"10 m pixels, kriging at 30 m","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Random Forest, 10 m pixels + 30 m kriging","note":""},{"id":"m17","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands + Landsat bands","C":"","s":"bands+landsat","n":"Random Forest","note":"also uses Landsat reflectance bands as input"},{"id":"m18","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands","C":"","s":"bands+indices+landsat","n":"Random Forest","note":"also uses Landsat reflectance bands as input"},{"id":"m19","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands and indices","C":"","s":"bands+indices+landsat+lindices","n":"Random Forest","note":"also uses Landsat reflectance bands as input and Landsat indices"},{"id":"m20","g":"Random Forest","L":"30 m cells, one model per date","W":"","in":"S2 bands + S2−Landsat band differences","C":"","s":"bands+diff","n":"Random Forest","note":"also uses (Sentinel-2 - Landsat) band differences as input"},{"id":"m21","g":"XGBoost","L":"30 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"XGBoost","note":""},{"id":"m22","g":"XGBoost","L":"one model for all dates","W":"","in":"S2 bands","C":"","s":"bands","n":"XGBoost, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m23","g":"XGBoost","L":"10 m pixels, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"XGBoost, 10 m pixels","note":""},{"id":"m24","g":"XGBoost","L":"10 m pixels, kriging at 30 m","W":"","in":"S2 bands","C":"","s":"bands","n":"XGBoost, 10 m pixels + 30 m kriging","note":""},{"id":"m25","g":"XGBoost","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"XGBoost","note":""},{"id":"m26","g":"XGBoost","L":"one model for all dates","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"XGBoost, one model for all dates","note":"model alone: trained on other dates only (no information about the day)"},{"id":"m27","g":"XGBoost","L":"10 m pixels, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"XGBoost, 10 m pixels","note":""},{"id":"m28","g":"XGBoost","L":"10 m pixels, kriging at 30 m","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"XGBoost, 10 m pixels + 30 m kriging","note":""},{"id":"m29","g":"XGBoost","L":"30 m cells, one model per date","W":"","in":"S2 bands + Landsat bands","C":"","s":"bands+landsat","n":"XGBoost","note":"also uses Landsat reflectance bands as input"},{"id":"m30","g":"XGBoost","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands","C":"","s":"bands+indices+landsat","n":"XGBoost","note":"also uses Landsat reflectance bands as input"},{"id":"m31","g":"XGBoost","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands and indices","C":"","s":"bands+indices+landsat+lindices","n":"XGBoost","note":"also uses Landsat reflectance bands as input and Landsat indices"},{"id":"m32","g":"SVM","L":"30 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"SVM","note":""},{"id":"m33","g":"SVM","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"SVM","note":""},{"id":"m34","g":"MLP","L":"30 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (per date)","note":""},{"id":"m35","g":"MLP","L":"100 m cells, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (per date), 100 m cells","note":""},{"id":"m36","g":"MLP","L":"10 m pixels, one model per date","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (per date), 10 m pixels","note":""},{"id":"m37","g":"MLP","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"MLP (per date)","note":""},{"id":"m38","g":"MLP","L":"100 m cells, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"MLP (per date), 100 m cells","note":""},{"id":"m39","g":"MLP","L":"10 m pixels, one model per date","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"MLP (per date), 10 m pixels","note":""},{"id":"m40","g":"MLP","L":"30 m cells, one model per date","W":"","in":"S2 bands + Landsat bands","C":"","s":"bands+landsat","n":"MLP (per date)","note":"also uses Landsat reflectance bands as input"},{"id":"m41","g":"MLP","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands","C":"","s":"bands+indices+landsat","n":"MLP (per date)","note":"also uses Landsat reflectance bands as input"},{"id":"m42","g":"MLP","L":"30 m cells, one model per date","W":"","in":"S2 bands + indices + Landsat bands and indices","C":"","s":"bands+indices+landsat+lindices","n":"MLP (per date)","note":"also uses Landsat reflectance bands as input and Landsat indices"},{"id":"m43","g":"MLP, pooled over dates","L":"1×1 pixel input","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (pooled), 1x1","note":""},{"id":"m44","g":"MLP, pooled over dates","L":"1×1, wider network","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (pooled), 1x1 wide","note":""},{"id":"m45","g":"MLP, pooled over dates","L":"3×3 pixel window","W":"","in":"S2 bands","C":"","s":"bands","n":"MLP (pooled), 3x3","note":""},{"id":"m46","g":"U-Net","L":"plain loss","W":"","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net","note":""},{"id":"m53","g":"U-Net","L":"plain loss","W":"","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net, 100 m loss","note":""},{"id":"m47","g":"U-Net","L":"gradient loss","W":"","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net, gradient loss","note":""},{"id":"m81","g":"U-Net","L":"gradient loss","W":"","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net, gradient loss, 100 m loss","note":""},{"id":"m48","g":"U-Net","L":"edge-weighted loss","W":"","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net, edge-weighted loss","note":""},{"id":"m82","g":"U-Net","L":"edge-weighted loss","W":"","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net, edge-weighted loss, 100 m loss","note":""},{"id":"m49","g":"U-Net","L":"S2-guided loss","W":"","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net, S2-guided loss","note":""},{"id":"m83","g":"U-Net","L":"S2-guided loss","W":"","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net, S2-guided loss, 100 m loss","note":""},{"id":"m50","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + Landsat bands (expert branch, FiLM)","C":"30 m cells","s":"bands","n":"U-Net, Landsat expert (FiLM)","note":"also uses Landsat reflectance bands as input"},{"id":"m86","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + Landsat bands (expert branch, FiLM)","C":"100 m cells","s":"bands","n":"U-Net, Landsat expert (FiLM), 100 m loss","note":"also uses Landsat reflectance bands as input"},{"id":"m51","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + Landsat bands","C":"30 m cells","s":"bands","n":"U-Net, Landsat bands as inputs","note":"also uses Landsat reflectance bands as input"},{"id":"m85","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + Landsat bands","C":"100 m cells","s":"bands","n":"U-Net, Landsat bands as inputs, 100 m loss","note":"also uses Landsat reflectance bands as input"},{"id":"m52","g":"U-Net","L":"raw LST target","W":"","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net, raw LST target","note":""},{"id":"m84","g":"U-Net","L":"raw LST target","W":"","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net, raw LST target, 100 m loss","note":""},{"id":"m54","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + indices","C":"30 m cells","s":"bands+indices","n":"U-Net","note":""},{"id":"m55","g":"U-Net","L":"plain loss","W":"","in":"S2 bands + indices","C":"100 m cells","s":"bands+indices","n":"U-Net, 100 m loss","note":""},{"id":"m56","g":"U-Net student","L":"Landsat term + teacher term","W":"added term, λ = 1 (step 13)","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, RF teacher (step 13)","note":""},{"id":"m87","g":"U-Net student","L":"Landsat term + teacher term","W":"added term, λ = 1 (step 13)","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, RF teacher (step 13), 100 m loss","note":""},{"id":"m57","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, s = 0.1","note":""},{"id":"m88","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, s = 0.1, 100 m loss","note":""},{"id":"m58","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, s = 0.25","note":""},{"id":"m65","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, s = 0.25, 100 m loss","note":""},{"id":"m59","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.5","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, s = 0.5","note":""},{"id":"m89","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.5","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, s = 0.5, 100 m loss","note":""},{"id":"m60","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.75","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, s = 0.75","note":""},{"id":"m90","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.75","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, s = 0.75, 100 m loss","note":""},{"id":"m61","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, s = 0.9","note":""},{"id":"m91","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, s = 0.9, 100 m loss","note":""},{"id":"m62","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = gradient","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = gradient","note":""},{"id":"m92","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = gradient","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = gradient, 100 m loss","note":""},{"id":"m63","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = local std","note":""},{"id":"m66","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = local std, 100 m loss","note":""},{"id":"m64","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = combined","in":"S2 bands","C":"30 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = combined","note":""},{"id":"m93","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = combined","in":"S2 bands","C":"100 m cells","s":"bands","n":"U-Net student, adaptive s(x), H = combined, 100 m loss","note":""},{"id":"m67","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands + indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.1","note":""},{"id":"m94","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands + indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.1, 100 m loss","note":""},{"id":"m68","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands + indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.25","note":""},{"id":"m95","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands + indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.25, 100 m loss","note":""},{"id":"m69","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands + indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.9","note":""},{"id":"m96","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands + indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.9, 100 m loss","note":""},{"id":"m70","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands + indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, adaptive s(x), H = local std","note":""},{"id":"m97","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands + indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, adaptive s(x), H = local std, 100 m loss","note":""},{"id":"m71","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands + indices, teacher RF with indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.1, RF teacher with indices","note":""},{"id":"m98","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.1","in":"S2 bands + indices, teacher RF with indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.1, 100 m loss, RF teacher with indices","note":""},{"id":"m72","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands + indices, teacher RF with indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.25, RF teacher with indices","note":""},{"id":"m76","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.25","in":"S2 bands + indices, teacher RF with indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.25, 100 m loss, RF teacher with indices","note":""},{"id":"m73","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.5","in":"S2 bands + indices, teacher RF with indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.5, RF teacher with indices","note":""},{"id":"m99","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.5","in":"S2 bands + indices, teacher RF with indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.5, 100 m loss, RF teacher with indices","note":""},{"id":"m74","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands + indices, teacher RF with indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, s = 0.9, RF teacher with indices","note":""},{"id":"m100","g":"U-Net student","L":"Landsat term + teacher term","W":"s = 0.9","in":"S2 bands + indices, teacher RF with indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, s = 0.9, 100 m loss, RF teacher with indices","note":""},{"id":"m75","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands + indices, teacher RF with indices","C":"30 m cells","s":"bands+indices","n":"U-Net student, adaptive s(x), H = local std, RF teacher with indices","note":""},{"id":"m101","g":"U-Net student","L":"Landsat term + teacher term","W":"adaptive s(x), H = local std","in":"S2 bands + indices, teacher RF with indices","C":"100 m cells","s":"bands+indices","n":"U-Net student, adaptive s(x), H = local std, 100 m loss, RF teacher with indices","note":""},{"id":"m77","g":"Fusion of 5 models","L":"mean of 5","W":"","in":"S2 bands","C":"","s":"bands","n":"Fusion, mean of 5","note":""},{"id":"m78","g":"Fusion of 5 models","L":"weighted","W":"","in":"S2 bands","C":"","s":"bands","n":"Fusion, weighted","note":"weights fitted on the test squares (step 11 cross-fits them; the saved map averages both halves)"},{"id":"m79","g":"Fusion of 5 models","L":"mean of 5","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Fusion, mean of 5","note":""},{"id":"m80","g":"Fusion of 5 models","L":"weighted","W":"","in":"S2 bands + indices","C":"","s":"bands+indices","n":"Fusion, weighted","note":"weights fitted on the test squares (step 11 cross-fits them; the saved map averages both halves)"}];
+var MAPS = {"20190606": {"s2": "images/20190606/s2.jpg", "landsat": "images/20190606/landsat.png", "m": {"m00": "images/20190606/m00.webp", "m01": "images/20190606/m01.webp", "m02": "images/20190606/m02.webp", "m03": "images/20190606/m03.webp", "m04": "images/20190606/m04.webp", "m05": "images/20190606/m05.webp", "m06": "images/20190606/m06.webp", "m07": "images/20190606/m07.webp", "m08": "images/20190606/m08.webp", "m09": "images/20190606/m09.webp", "m10": "images/20190606/m10.webp", "m11": "images/20190606/m11.webp", "m12": "images/20190606/m12.webp", "m13": "images/20190606/m13.webp", "m14": "images/20190606/m14.webp", "m15": "images/20190606/m15.webp", "m16": "images/20190606/m16.webp", "m17": "images/20190606/m17.webp", "m18": "images/20190606/m18.webp", "m19": "images/20190606/m19.webp", "m20": "images/20190606/m20.webp", "m21": "images/20190606/m21.webp", "m22": "images/20190606/m22.webp", "m23": "images/20190606/m23.webp", "m24": "images/20190606/m24.webp", "m25": "images/20190606/m25.webp", "m26": "images/20190606/m26.webp", "m27": "images/20190606/m27.webp", "m28": "images/20190606/m28.webp", "m29": "images/20190606/m29.webp", "m30": "images/20190606/m30.webp", "m31": "images/20190606/m31.webp", "m32": "images/20190606/m32.webp", "m33": "images/20190606/m33.webp", "m34": "images/20190606/m34.webp", "m35": "images/20190606/m35.webp", "m36": "images/20190606/m36.webp", "m37": "images/20190606/m37.webp", "m38": "images/20190606/m38.webp", "m39": "images/20190606/m39.webp", "m40": "images/20190606/m40.webp", "m41": "images/20190606/m41.webp", "m42": "images/20190606/m42.webp", "m43": "images/20190606/m43.webp", "m44": "images/20190606/m44.webp", "m45": "images/20190606/m45.webp", "m46": "images/20190606/m46.webp", "m53": "images/20190606/m53.webp", "m47": "images/20190606/m47.webp", "m81": "images/20190606/m81.webp", "m48": "images/20190606/m48.webp", "m82": "images/20190606/m82.webp", "m49": "images/20190606/m49.webp", "m83": "images/20190606/m83.webp", "m50": "images/20190606/m50.webp", "m86": "images/20190606/m86.webp", "m51": "images/20190606/m51.webp", "m85": "images/20190606/m85.webp", "m52": "images/20190606/m52.webp", "m84": "images/20190606/m84.webp", "m54": "images/20190606/m54.webp", "m55": "images/20190606/m55.webp", "m56": "images/20190606/m56.webp", "m87": "images/20190606/m87.webp", "m57": "images/20190606/m57.webp", "m88": "images/20190606/m88.webp", "m58": "images/20190606/m58.webp", "m65": "images/20190606/m65.webp", "m59": "images/20190606/m59.webp", "m89": "images/20190606/m89.webp", "m60": "images/20190606/m60.webp", "m90": "images/20190606/m90.webp", "m61": "images/20190606/m61.webp", "m91": "images/20190606/m91.webp", "m62": "images/20190606/m62.webp", "m92": "images/20190606/m92.webp", "m63": "images/20190606/m63.webp", "m66": "images/20190606/m66.webp", "m64": "images/20190606/m64.webp", "m93": "images/20190606/m93.webp", "m67": "images/20190606/m67.webp", "m94": "images/20190606/m94.webp", "m68": "images/20190606/m68.webp", "m95": "images/20190606/m95.webp", "m69": "images/20190606/m69.webp", "m96": "images/20190606/m96.webp", "m70": "images/20190606/m70.webp", "m97": "images/20190606/m97.webp", "m71": "images/20190606/m71.webp", "m98": "images/20190606/m98.webp", "m72": "images/20190606/m72.webp", "m76": "images/20190606/m76.webp", "m73": "images/20190606/m73.webp", "m99": "images/20190606/m99.webp", "m74": "images/20190606/m74.webp", "m100": "images/20190606/m100.webp", "m75": "images/20190606/m75.webp", "m101": "images/20190606/m101.webp", "m77": "images/20190606/m77.webp", "m78": "images/20190606/m78.webp", "m79": "images/20190606/m79.webp", "m80": "images/20190606/m80.webp"}}, "20230509": {"s2": "images/20230509/s2.jpg", "landsat": "images/20230509/landsat.png", "m": {"m00": "images/20230509/m00.png", "m09": "images/20230509/m09.png", "m21": "images/20230509/m21.png", "m34": "images/20230509/m34.png", "m46": "images/20230509/m46.png", "m63": "images/20230509/m63.png"}}};
+var BYID = {}; MS.forEach(function (m) { BYID[m.id] = m; });
+var ABOUT = {
+  "Linear Regression": "A straight-line formula from the inputs.",
+  "Random Forest": "Many decision trees, averaged.",
+  "XGBoost": "Decision trees added one after another, each fixing the last.",
+  "SVM": "Support vector regression.",
+  "MLP": "A small neural network that sees one pixel at a time.",
+  "MLP, pooled over dates": "One small neural network trained on all 30 dates together.",
+  "U-Net": "One image network trained on all 30 dates; it sees the pixels around each pixel.",
+  "U-Net student": "A U-Net that also copies a Random Forest map (the teacher). Teacher weight s: the share of the loss given to the teacher; adaptive s(x) changes it from place to place with how varied Sentinel-2 is nearby (H).",
+  "Fusion of 5 models": "The maps of five models combined into one."
+};
+var GW = 2082, GH = 2394, LEFT_E = 368580, TOP_N = 6174660;
+var GO = { all: [1, 0.5, 0.5], rail: [8, 700 / 2082, 1000 / 2394], motor: [8, 1000 / 2082, 1600 / 2394] };
+var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var DIMS = ["L", "W", "in", "C"];
+function lab(id) { return (+id.slice(6)) + " " + MON[+id.slice(4, 6) - 1] + " " + id.slice(0, 4); }
+function row(id) { return D.filter(function (r) { return r[0] === id; })[0]; }
+function ver(m) { return m.L + (m.W ? " · " + m.W : "") + (m.C ? " · " + m.C : ""); }
+function mname(m) { return m.g + " · " + ver(m); }
+function uniq(a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function closest(cur, dim, val) {
+  var c = MS.filter(function (m) { return m.g === cur.g && m[dim] === val; }), best = c[0], bs = -1;
+  c.forEach(function (m) { var sc = DIMS.filter(function (k) { return k !== dim && m[k] === cur[k]; }).length * 2 + (m.s === "bands" ? 0.5 : 0); if (sc > bs) { bs = sc; best = m; } });
+  return best.id;
+}
+function firstOf(g) { var c = MS.filter(function (m) { return m.g === g; }); return (c.filter(function (m) { return m.s === "bands"; })[0] || c[0]).id; }
+function find(n) { return MS.filter(function (m) { return m.n === n && m.s === "bands"; })[0].id; }
+var KEY = {}, LUTA = [];
+for (var j = 0; j < 255; j++) { var c0 = [0, 2, 4].map(function (o) { return parseInt(LUT.substr(j * 6 + o, 2), 16); }); LUTA.push(c0); KEY[(c0[0] << 16) | (c0[1] << 8) | c0[2]] = j + 1; }
+function nearest(r, g, b) { var best = 1, bd = 1e9; for (var i = 0; i < 255; i++) { var c = LUTA[i], d = (c[0]-r)*(c[0]-r) + (c[1]-g)*(c[1]-g) + (c[2]-b)*(c[2]-b); if (d < bd) { bd = d; best = i + 1; } } return best; }
+
+var S = { date: "20190606", n: 2, picks: ["landsat", find("U-Net"), find("Random Forest"), find("U-Net student, adaptive s(x), H = local std")], under: true };
+var V = { k: 1, cx: 0.5, cy: 0.5 };
+var P = [];            // per panel: {vp, zl, mk, rd, sb, sl}
+var cache = {}, last = null;
+var $ = function (id) { return document.getElementById(id); };
+
+function url(key) { var m = MAPS[S.date]; if (!m) return null; return key === "s2" ? m.s2 : key === "landsat" ? m.landsat : (m.m[key] || null); }
+function clampView() { V.k = Math.min(24, Math.max(1, V.k)); var h = 0.5 / V.k; V.cx = Math.min(1 - h, Math.max(h, V.cx)); V.cy = Math.min(1 - h, Math.max(h, V.cy)); }
+function apply(smooth) {
+  clampView();
+  var tf = "translate(" + (100 * (0.5 - V.k * V.cx)) + "%," + (100 * (0.5 - V.k * V.cy)) + "%) scale(" + V.k + ")";
+  var span = GW * 10 / V.k, nice = [50, 100, 200, 500, 1000, 2000, 5000].filter(function (m) { return m <= span * 0.3; }).pop() || 50;
+  P.forEach(function (p) {
+    p.zl.style.transition = smooth ? "transform 0.45s ease" : "none"; p.zl.style.transform = tf;
+    p.sb.style.width = (100 * nice / span) + "%"; p.sl.textContent = nice >= 1000 ? (nice / 1000) + " km" : nice + " m";
+  });
+  $("zoom").textContent = "×" + V.k.toFixed(1);
+}
+function zoomAt(u, w, f, smooth) {
+  var px = V.cx + (u - 0.5) / V.k, py = V.cy + (w - 0.5) / V.k;
+  V.k = Math.min(24, Math.max(1, V.k * f)); V.cx = px - (u - 0.5) / V.k; V.cy = py - (w - 0.5) / V.k; apply(smooth);
+}
+function go(t) { V = { k: t[0], cx: t[1], cy: t[2] }; apply(true); }
+function data(u) {
+  var c = cache[u]; if (c) return c;
+  c = cache[u] = { st: "loading" };
+  var img = new Image();
+  img.onload = function () {
+    try {
+      var cv = document.createElement("canvas"); cv.width = GW; cv.height = GH;
+      var ctx = cv.getContext("2d", { willReadFrequently: true }); ctx.drawImage(img, 0, 0);
+      var px = ctx.getImageData(0, 0, GW, GH).data, out = new Uint8Array(GW * GH);
+      for (var o = 0, q = 0; o < out.length; o++, q += 4) {
+        if (px[q + 3] < 128) continue;
+        var k = KEY[(px[q] << 16) | (px[q + 1] << 8) | px[q + 2]];
+        out[o] = k === undefined ? nearest(px[q], px[q + 1], px[q + 2]) : k;
+      }
+      c.st = "ok"; c.arr = out;
+    } catch (e) { c.st = "fail"; }
+    if (last) hover(last[0], last[1]);
+  };
+  img.onerror = function () { c.st = "fail"; };
+  img.src = u;
+  return c;
+}
+function hover(px, py) {
+  if (px >= 0) last = [px, py];
+  var scale = row(S.date)[2], inside = px >= 0 && px < 1 && py >= 0 && py < 1;
+  $("coord").textContent = inside ? "UTM 33N · E " + Math.round(LEFT_E + px * GW * 10) + " · N " + Math.round(TOP_N - py * GH * 10) : "UTM 33N · hover a map";
+  P.forEach(function (p, i) {
+    var key = S.picks[i], u = url(key);
+    p.mk.style.display = inside && u ? "block" : "none";
+    p.mk.style.left = (100 * (0.5 + V.k * (px - V.cx))) + "%"; p.mk.style.top = (100 * (0.5 + V.k * (py - V.cy))) + "%";
+    if (!u) { p.rd.textContent = ""; return; }
+    if (!inside) { p.rd.textContent = "hover for °C"; return; }
+    if (key === "s2") { p.rd.textContent = "Sentinel-2"; return; }
+    var c = data(u);
+    if (c.st === "loading") { p.rd.textContent = "reading…"; return; }
+    if (c.st === "fail" || !scale) { p.rd.textContent = "°C readout not available here"; return; }
+    var idx = c.arr[Math.floor(py * GH) * GW + Math.floor(px * GW)];
+    if (!idx) { p.rd.textContent = "water or cloud gap"; return; }
+    var t = scale[0] + (idx - 1) / 254 * (scale[1] - scale[0]);
+    p.rd.textContent = (idx === 1 ? "≤ " : idx === 255 ? "≥ " : "") + t.toFixed(1) + " °C";
+  });
+}
+function attach(el) {
+  var drag = null;
+  var uv = function (e) { var b = el.getBoundingClientRect(); return [(e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height]; };
+  var toImg = function (p) { return [V.cx + (p[0] - 0.5) / V.k, V.cy + (p[1] - 0.5) / V.k]; };
+  el.addEventListener("wheel", function (e) { e.preventDefault(); var p = uv(e); zoomAt(p[0], p[1], Math.exp(-e.deltaY * 0.0015), false); var q = toImg(p); hover(q[0], q[1]); }, { passive: false });
+  el.addEventListener("pointerdown", function (e) { if (e.button !== 0) return; drag = { x: e.clientX, y: e.clientY }; try { el.setPointerCapture(e.pointerId); } catch (x) {} });
+  el.addEventListener("pointermove", function (e) {
+    if (drag) { var b = el.getBoundingClientRect(); V.cx -= (e.clientX - drag.x) / (b.width * V.k); V.cy -= (e.clientY - drag.y) / (b.height * V.k); drag = { x: e.clientX, y: e.clientY }; apply(false); }
+    var q = toImg(uv(e)); hover(q[0], q[1]);
+  });
+  var end = function () { drag = null; };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("pointerleave", function () { if (!drag) { last = null; hover(-1, -1); } });
+  el.addEventListener("dblclick", function (e) { var p = uv(e); zoomAt(p[0], p[1], 2, true); });
+}
+function setPick(i, key) { S.picks[i] = key; render(); }
+function options(list, val) { return list.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === val ? " selected" : "") + ">" + esc(o.label) + "</option>"; }).join(""); }
+
+function render() {
+  var r = row(S.date), mp = MAPS[S.date];
+  $("dt").innerHTML = options(D.map(function (x) { return { id: x[0], label: lab(x[0]) + " · " + Math.round(x[1]) + " % clear" + (x[0] === "20190606" ? " · all maps" : MAPS[x[0]] ? " · 6 maps" : "") }; }), S.date);
+  $("counts").innerHTML = [2, 3, 4].map(function (c) { return '<button type="button" class="tb' + (S.n === c ? " on" : "") + '" data-n="' + c + '">' + c + " maps</button>"; }).join("");
+  $("lo").textContent = r[2] ? r[2][0] + " °C" : "–"; $("hi").textContent = r[2] ? r[2][1] + " °C" : "–";
+  $("under").checked = S.under;
+  var groupOpts = [{ id: "s2", label: "Sentinel-2, true colour" }, { id: "landsat", label: "Landsat LST, 30 m (target)" }].concat(
+    GROUPS.map(function (g) { return { id: g, label: g + " (" + MS.filter(function (m) { return m.g === g; }).length + ")" }; }));
+  var grid = $("maps-grid"), html = "";
+  grid.style.setProperty("--cols", S.n === 3 ? 3 : 2);
+  for (var i = 0; i < S.n; i++) {
+    var key = S.picks[i], m = BYID[key], u = url(key), gm = m ? MS.filter(function (x) { return x.g === m.g; }) : [];
+    var dim = function (k, none) {
+      var vals = uniq(gm.map(function (x) { return x[k]; }));
+      if (!m || !vals.length) return { off: true, val: "", opts: [{ id: "", label: none }] };
+      return { off: vals.length < 2, val: m[k], opts: vals.map(function (v) {
+        var exact = gm.some(function (x) { return x[k] === v && DIMS.every(function (o) { return o === k || x[o] === m[o]; }); });
+        return { id: v, label: v + (exact ? "" : " (other choices change)") }; }) };
+    };
+    var dL = dim("L", "—"), dW = dim("W", m ? "— (U-Net student only)" : "—"), dI = dim("in", "—"), dC = dim("C", m ? "— (U-Net only)" : "—");
+    var sel = function (k, d, label, n) { return '<div class="dim"><span class="lb">' + label + '</span><select class="sel" data-i="' + n + '" data-dim="' + k + '"' + (d.off ? " disabled" : "") + ' aria-label="' + label + " on map " + (n + 1) + '">' + options(d.opts, d.val) + "</select></div>"; };
+    var caption = key === "s2" ? "Sentinel-2 bands 4-3-2, 10 m" : key === "landsat" ? "the target · measured at about 100 m" : "Inputs: " + m.in + (u ? "" : " · no map for this date");
+    var about = key === "s2" ? "What the satellite sees in visible light; the models learn from this and 4 more bands." : key === "landsat" ? "Landsat thermal data, measured at about 100 m and delivered on a 30 m grid. The models are trained to match it." : ABOUT[m.g] + (m.C ? " Loss cell: during training the map is averaged to 30 m or 100 m squares and compared with Landsat there." : "") + (m.note ? " Note: " + m.note + "." : "");
+    var showBase = !!mp && (key === "s2" || S.under), showTop = !!u && key !== "s2";
+    var noneText = !mp ? "Maps for this date are not published on this page yet." : "This model's map is published for 6 June 2019 only.";
+    html += '<figure><figcaption>' +
+      '<div style="display:flex;gap:10px;align-items:center"><span class="num">' + (i + 1) + '</span><select class="sel" data-i="' + i + '" data-dim="group" aria-label="Model on map ' + (i + 1) + '" style="flex:1">' + options(groupOpts, m ? m.g : key) + "</select></div>" +
+      '<div class="two" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">' + sel("L", dL, "Loss / training", i) + sel("C", dC, "Loss cell", i) + "</div>" +
+      '<div class="two" style="grid-template-columns:repeat(2,minmax(0,1fr))">' + sel("W", dW, "Teacher weight", i) + sel("in", dI, "Inputs", i) + "</div>" +
+      '<span class="capline">' + esc(caption) + "</span></figcaption>" +
+      '<div class="vp"><div class="zl">' + (showBase ? '<img src="' + mp.s2 + '" alt="">' : "") + (showTop ? '<img src="' + u + '" alt="' + esc((m ? mname(m) : key) + ", " + lab(S.date)) + '">' : "") + "</div>" +
+      (!u ? '<p class="none">' + esc(noneText) + "</p>" : "") +
+      '<div class="mk"></div><div class="rd"></div><div class="sb"><div style="width:25%"></div><span></span></div></div>' +
+      '<p class="about">' + esc(about) + "</p></figure>";
+  }
+  grid.innerHTML = html;
+  P = [];
+  grid.querySelectorAll(".vp").forEach(function (vp) {
+    P.push({ vp: vp, zl: vp.querySelector(".zl"), mk: vp.querySelector(".mk"), rd: vp.querySelector(".rd"), sb: vp.querySelector(".sb div"), sl: vp.querySelector(".sb span") });
+    attach(vp);
+  });
+  apply(false);
+  if (last) hover(last[0], last[1]); else hover(-1, -1);
+}
+
+$("maps-grid").addEventListener("change", function (e) {
+  var t = e.target, i = +t.getAttribute("data-i"), k = t.getAttribute("data-dim"), v = t.value;
+  if (k === "group") setPick(i, v === "s2" || v === "landsat" ? v : firstOf(v));
+  else setPick(i, closest(BYID[S.picks[i]], k, v));
+});
+$("dt").addEventListener("change", function (e) { S.date = e.target.value; render(); });
+$("counts").addEventListener("click", function (e) { var n = e.target.getAttribute("data-n"); if (n) { S.n = +n; render(); } });
+$("under").addEventListener("change", function (e) { S.under = e.target.checked; render(); });
+document.querySelectorAll("[data-go]").forEach(function (b) { b.addEventListener("click", function () { go(GO[b.getAttribute("data-go")]); }); });
+$("zin").addEventListener("click", function () { zoomAt(0.5, 0.5, 1.6, true); });
+$("zout").addEventListener("click", function () { zoomAt(0.5, 0.5, 1 / 1.6, true); });
+$("nmodels").textContent = MS.length;
+render();
+</script>
+</body>
+</html>
